@@ -1,0 +1,18 @@
+{
+	"embedColorSuccess": "00D26A",
+	"embedColorWarning": "FFCC4D",
+	"embedColorError": "FB2F61",
+	"commandDmOnly": "`❌` Cette commande ne peut pas être exécutée dans les messages privés.",
+	"embedErrorMessage": "`❌` Une erreur s'est produite !",
+	"commandDevOnly": "`❌` Cette commande ne peut être exécutée que par les développeurs.",
+	"commandTestMode": "`❌` Ceci est en développement et ne peut pas être exécuté sur ce serveur.",
+	"commandPremiumOnly": "`❌` Cette commande ne peut être exécutée que par les utilisateurs premium.",
+	"commandTimeOut": "`❌` Vous envoyez trop de commandes. Veuillez attendre un moment.",
+	"userNoPermissions": "`❌` Vous n'avez pas suffisamment de permissions pour exécuter cette commande.",
+	"botNoPermissions": "`❌` Je n'ai pas suffisamment de permissions pour exécuter cette commande.",
+	"hasHigherRolePosition": "`❌` Cette personne a un rôle supérieur ou le même rôle que vous.",
+	"unableToInteractWithYourself": "`❌` Vous ne pouvez pas faire cela à vous-même.",
+	"cannotUseButton": "`❌` Vous ne pouvez pas utiliser ce bouton.",
+	"cannotUseSelet": "`❌` Vous ne pouvez pas utiliser ce menu.",
+	"footerText": "Crée par Sajima"
+}
