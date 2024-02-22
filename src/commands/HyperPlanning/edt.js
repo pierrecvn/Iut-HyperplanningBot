@@ -95,7 +95,7 @@ module.exports = {
 			const date = new Date();
 			choices = [];
 
-			for (let i = 0; i < 24; i++) {
+			for (let i = 0; i < 25; i++) {
 				let futureDate = new Date();
 				futureDate.setDate(date.getDate() + i);
 				const month = futureDate.getMonth() + 1;
@@ -121,8 +121,6 @@ module.exports = {
 			return { name: `${choice} : ${formattedName.charAt(0).toUpperCase() + formattedName.slice(1)}`, value: choice };
 		});
 
-		// Ajouter le message supplémentaire à la fin
-		response.push({ name: "Pour une autre date, mettre sous le format jj/mm :", value: "jj/mm" });
 
 		await interaction.respond(response);
 		
@@ -146,7 +144,7 @@ module.exports = {
 
 		const dataDB = await user.findOne({ UserId: utilisateur.id });
 
-		if (!dataDB.Group) { return interaction.editReply({ content: `${utilisateur} n'as pas de groupe par défaut` }); }
+		if (interaction.uesr === utilisateur && !iclasse && !dataDB.Group) { return interaction.editReply({ content: `${utilisateur} n'as pas de groupe par défaut` }); }
 
 		if (!iclasse && !dataDB || !dataDB.Group && !iclasse) {
 
@@ -197,15 +195,33 @@ module.exports = {
 
 		events = Object.values(data).filter(ev => ev.type === 'VEVENT' && new Date(ev.start).setHours(0, 0, 0, 0) === now.setHours(0, 0, 0, 0));
 
+		// console.log(events);
 		if (events.length === 0) {
 			return interaction.editReply({ embeds: [new EmbedBuilder().setTitle(`Emploi du temps du ${now.toLocaleDateString('fr-FR')}`).setColor('#0099ff').setDescription('Aucun cours ! va dormir !').setTimestamp()] });
 		}
-
-		events.sort((a, b) => a.start - b.start);
+		// --------------------------------------------------------------------------------------------------------------------------------------------------------------
+		// // Assurez-vous qu'il y a au moins un événement dans le tableau
+		// if (events.length > 0) {
+			// 	// Copier le premier événement
+			// 	let testEvent = { ...events[0] };
+			
+			// 	// Modifier l'heure de début et de fin
+			// 	let pastDate = new Date();
+			// 	pastDate.setMinutes(pastDate.getMinutes() - 60); // Définir à 60 minutes avant l'heure actuelle
+			// 	testEvent.start = pastDate;
+			
+			// 	let pastEndDate = new Date(pastDate);
+			// 	pastEndDate.setMinutes(pastEndDate.getMinutes() + 30); // Fin 30 minutes après le début
+			// 	testEvent.end = pastEndDate;
+			
+			// 	// Ajouter l'événement de test au tableau d'événements
+			// 	events.push(testEvent);
+			// }
+			// --------------------------------------------------------------------------------------------------------------------------------------------------------------
+			events.sort((a, b) => a.start - b.start);
 
 		switch (subcmd) {
 			case "texte":
-
 				const embeds = [];
 				let fields = [];
 
@@ -224,37 +240,51 @@ module.exports = {
 					const timePassed = now - end;
 					const timeToEnd = end - now;
 
-					const timeRemainingString = timePassed > 0 ? 'Le cours est terminé' : timeRemaining > 0 ? `${Math.floor(timeRemaining / 1000 / 60)} minutes` : 'Le cours a commencé';
-					const timeToEndString = timeToEnd > 0 ? `${Math.floor(timeToEnd / 1000 / 60)} minutes restantes` : 'Le cours est terminé';
+					const timeRemainingString = timePassed > 0 ? '~~Le cours est terminé~~' : timeRemaining > 0 ? `\`${Math.floor(timeRemaining / 1000 / 60)} minutes\`` : 'Le cours a commencé';
+					const timeToEndString = timeToEnd > 0 ? `\`${Math.floor(timeToEnd / 1000 / 60)} minutes restantes\`` : '~~Le cours est terminé~~';
 
-					fields.push(
-						{ name: 'Salle', value: ev.location ? ev.location.val : 'Pas de salle', inline: true },
-						{ name: 'Matière', value: ev.description ? ev.description.val.split(' : ')[1].split('\n')[0] : 'Pas d\'Matière', inline: true },
-						{ name: 'Début', value: startString, inline: true },
-						{ name: 'Fin', value: endString, inline: true },
-						{ name: 'Temps avant début', value: timeRemainingString, inline: true },
-						{ name: 'Temps avant fin', value: timeToEndString, inline: true },
-					);
+					const isPast = now > end;
 
-					// Ajouter une ligne de séparation pour le cours actuel
-					if (now >= start && now <= end) {
-						fields.push({ name: '\u200B', value: '-----------', inline: false });
-					}
-
-					if (fields.length >= 24 || index === events.length - 1) {
+					if (fields.length + 7 > 25) {
 						const edtTextEmbed = new EmbedBuilder()
-							.setTitle(`Emploi du temps du ${now.toLocaleDateString('fr-FR')}`)
+							.setTitle(`Emploi du temps  :  __**${now.toLocaleDateString('fr-FR')}**__ - ${classe.toUpperCase()}`)
 							.setColor('#0099ff')
 							.addFields(fields)
 							.setTimestamp();
 						embeds.push(edtTextEmbed);
 						fields = [];
 					}
+
+					fields.push(
+						{ name: '> Salle', value: isPast ? `~~${ev.location ? `${ev.location.val}` : 'Pas de salle'}~~` : `${ev.location ? `${ev.location.val}` : 'Pas de salle'}`, inline: true },
+						{ name: 'Début', value: isPast ? `~~${startString}~~` : `${startString}`, inline: true },
+						{ name: 'Fin', value: isPast ? `~~${endString}~~` : `${endString}`, inline: true },
+						{ name: 'Matière', value: isPast ? `~~${ev.description ? `${ev.description.val.split(' : ')[1].split('\n')[0]}` : 'Pas d\'Matière'}~~` : `${ev.description ? `${ev.description.val.split(' : ')[1].split('\n')[0]}` : 'Pas d\'Matière'}`, inline: true },
+						{ name: 'Temps avant début', value: timeRemainingString, inline: true },
+						{ name: 'Temps avant fin', value: timeToEndString, inline: true },
+					);
+
+					if (now >= start && now <= end) {
+						fields.push({ name: 'En cours', value: '---------------------------------------------------------------------------\nA suivre :', inline: false });
+					}
+
+					fields.push({ name: ' ', value: ' ' });
+
+					if (index === events.length - 1) {
+						const edtTextEmbed = new EmbedBuilder()
+							.setTitle(`Emploi du temps  :  __**${now.toLocaleDateString('fr-FR')}**__ - ${classe.toUpperCase()}`)
+							.setColor('#0099ff')
+							.addFields(fields)
+							.setTimestamp();
+						embeds.push(edtTextEmbed);
+					}
 				});
 
 				interaction.editReply({ embeds: embeds });
-
 				break;
+			// ...
+		
+
 
 
 			case "image":

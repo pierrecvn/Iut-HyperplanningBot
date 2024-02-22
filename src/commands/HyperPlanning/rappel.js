@@ -29,7 +29,7 @@ module.exports = {
 	runAutocomplete: async (client, interaction) => {
 
 		const focusedOption = interaction.options.getFocused(true);
-		const choices = ["5 min avant le cours", "10 min avant le cours", "15 min avant le cours", "20 min avant le cours", "25 min avant le cours", "30 min avant le cours", "35 min avant le cours", "40 min avant le cours", "45 min avant le cours", "50 min avant le cours", "55 min avant le cours", "1h avant le cours"]
+		const choices = ["5 min avant le cours", "10 min avant le cours", "15 min avant le cours", "20 min avant le cours"]
 		const filtered = choices.filter(choice => choice.includes(focusedOption.value.toLowerCase()));
 		const filteredLimit = filtered.slice(0, 25);
 		await interaction.respond(filteredLimit.map(choice => ({ name: choice, value: choice })));
