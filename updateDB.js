@@ -1,10 +1,32 @@
 const MongoClient = require('mongodb').MongoClient;
 
+/**
+ * URI de la base de données source
+ * @type {string}
+ */
 const sourceUri = 'mongodb+srv://bot:kYbZ5dxdYsHzTnfm@cluster0.adjsubc.mongodb.net/Hyperplanning?retryWrites=true&w=majority';
+
+/**
+ * URI de la base de données cible
+ * @type {string}
+ */
 const targetUri = 'mongodb+srv://bot:kYbZ5dxdYsHzTnfm@cluster0.adjsubc.mongodb.net/HyperplanningTEST?retryWrites=true&w=majority';
 
+/**
+ * Clone la base de données source vers la base de données cible.
+ * @async
+ */
 async function cloneDb() {
+	/**
+	 * Client pour la base de données source
+	 * @type {MongoClient}
+	 */
 	const sourceClient = new MongoClient(sourceUri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+	/**
+	 * Client pour la base de données cible
+	 * @type {MongoClient}
+	 */
 	const targetClient = new MongoClient(targetUri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 	try {

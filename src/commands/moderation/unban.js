@@ -20,7 +20,7 @@ module.exports = {
 		.toJSON(),
 	userPermissions: [PermissionFlagsBits.BanMembers],
 	botPermissions: [PermissionFlagsBits.BanMembers],
-
+	deleted: true,
 	run: async (client, interaction) => {
 		const { options, guildId, guild, member } = interaction;
 

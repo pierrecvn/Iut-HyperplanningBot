@@ -14,7 +14,7 @@ module.exports = {
 		.toJSON(),
 	userPermissions: [PermissionFlagsBits.ManageMessages],
 	botPermissions: [],
-
+	deleted: true,
 	run: async (client, interaction) => {
 
 		const { options, guildId, guild ,member} = interaction;

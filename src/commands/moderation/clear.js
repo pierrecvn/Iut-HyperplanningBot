@@ -20,7 +20,7 @@ module.exports = {
 
 	userPermissions: [PermissionFlagsBits.ManageMessages],
 	botPermissions: [PermissionFlagsBits.ManageMessages],
-
+	deleted: true,
 	run: async (client, interaction) => {
 		const { options, guildId, member, channel } = interaction;
 		const amount = options.getInteger('nombre');

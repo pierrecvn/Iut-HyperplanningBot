@@ -24,7 +24,7 @@ module.exports = {
 	userPermissions: [PermissionFlagsBits.Administrator],
 	botPermissions: [],//[PermissionFlagsBits.ManageGuild],
 
-
+	deleted: false,
 	run: async (client, interaction) => {
 		const { options, guildId, guild } = interaction;
 		const subcmd = options.getSubcommand();

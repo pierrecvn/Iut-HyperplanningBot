@@ -7,6 +7,7 @@ const ical = require('node-ical');
 const puppeteer = require('puppeteer');
 const fs = require('fs')	
 const path = require('path');
+const mConfig = require('../../messageConfig.json');
 
 const formatTimeLibre = (date) => {
 	const day = date.getDate().toString().padStart(2, '0');
@@ -75,6 +76,12 @@ module.exports = {
 		await interaction.deferReply({ content: 'Traitement en cours ...' });
 
 		const nbSalle = interaction.options.getString('numero');
+
+		if (nbSalle && !Object.keys(getSalle).includes(nbSalle)) {
+				return interaction.editReply({ embeds: [new EmbedBuilder().setTitle(`Salle non valide`).setColor(mConfig.embedColorError).setDescription('Cette salle est invalide, \n Ex : /salle 602 ').setTimestamp()] , ephemeral: true});
+		}
+
+
 		if (nbSalle) {
 
 
@@ -279,27 +286,6 @@ module.exports = {
 
 			fs.unlinkSync(`./stdout/output_${rnd}.png`);
 			// await console.log('Image supprimée');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 		} else {

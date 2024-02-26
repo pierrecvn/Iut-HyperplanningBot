@@ -4,6 +4,7 @@ module.exports = {
 	customId: "exempleSelect",
 	devOnly : false,
 	testMode : false,
+	deleted: true,
 	sendDM : true,
 	userPermissions : [],
 	botPermissions : [],

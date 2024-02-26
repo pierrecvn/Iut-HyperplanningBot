@@ -11,9 +11,11 @@
 	"author": "Sajima",
 	"license": "ISC",
 	"dependencies": {
+		"canvas": "^2.11.2",
 		"colors": "^1.4.0",
-		"discord.js": "^14.13.0",
+		"discord.js": "^14.14.1",
 		"dotenv": "^16.3.1",
+		"jsdom": "^24.0.0",
 		"mongoose": "^7.5.2",
 		"node-ical": "^0.17.2",
 		"node-schedule": "^2.1.1",

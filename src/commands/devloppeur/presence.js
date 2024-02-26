@@ -47,6 +47,7 @@ module.exports = {
 	userPermissions: [PermissionFlagsBits.SendMessages],
 	botPermissions: [PermissionFlagsBits.SendMessages],
 	devOnly: true,
+	deleted: false,
 	run: async (client, interaction) => {
 
 		const subs = interaction.options.getSubcommand();

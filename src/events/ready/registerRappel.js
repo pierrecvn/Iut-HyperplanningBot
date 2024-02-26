@@ -8,16 +8,6 @@ const getClass = require('../../../src/utils/edtInfo.json');
 const ical = require('node-ical');
 const { getBrowser } = require('../../../src/events/ready/consoleLog.js');
 
-
-
-
-
-
-
-
-
-
-
 module.exports = async (client) => {
 
 	async function mainFunction() {
@@ -49,7 +39,7 @@ module.exports = async (client) => {
 
 				events = Object.values(data).filter(ev => ev.type === 'VEVENT' && new Date(ev.start).setHours(0, 0, 0, 0) === now.setHours(0, 0, 0, 0));
 				// --------------------------------------------------------------------------------------------------------------------------------------------------------------
-				// // // Assurez-vous qu'il y a au moins un événement dans le tableau
+				// // // // Assurez-vous qu'il y a au moins un événement dans le tableau
 				// if (events.length > 0) {
 				// 	// Copier le premier événement
 				// 	let testEvent = { ...events[0] };
@@ -77,7 +67,7 @@ module.exports = async (client) => {
 
 				// Pour chaque utilisateur dans le groupe
 				for (let user of usersByGroup[group]) {
-					// console.log(`Utilisateur ${user.UserId} dans le groupe ${group}`);
+					console.log(`Utilisateur ${user.UserId} dans le groupe ${group}`);
 					// Trouver le rappel actif pour cet utilisateur
 					const rappel = await Rappel.findOne({ userId: user.UserId, active: true }).exec();
 					if (rappel) {
@@ -88,7 +78,10 @@ module.exports = async (client) => {
 							const embed = new EmbedBuilder()
 								.setTitle(`Prochain cours : ${nextEvent.summary.val}`)
 								.setFooter({ text : `Rappel ${rappel.time}`})
-								.setDescription(`Début : ${nextEvent.start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} Fin : ${nextEvent.end.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`)
+								.setDescription(`
+								\n> Début : ${nextEvent.start.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}
+								\n> Fin   : ${nextEvent.end.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}
+								\n> Salle : ${nextEvent.location ? nextEvent.location.val : 'Pas de salle'}`)
 								.setColor('#0099ff');
 
 
@@ -106,8 +99,12 @@ module.exports = async (client) => {
 							}
 
 							// Planifier la nouvelle tâche
-							schedule.scheduleJob(jobId, jobDate, function () {
-								discordUser.send({ embeds: [embed] });
+							schedule.scheduleJob(jobId, jobDate, async function () {
+								try {
+									await discordUser.send({ embeds: [embed] });
+								} catch (error) {
+									console.error(`Impossible d'envoyer un message à l'utilisateur ${discordUser.id}: `, error);
+								}
 							});
 						} else {
 							console.log(`Impossible de trouver l'utilisateur avec l'ID ${user.UserId}`);
