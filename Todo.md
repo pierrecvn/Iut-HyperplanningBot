@@ -9,4 +9,5 @@
 - [ ] Possibilité d'utilisation avec le tram,  le bot envoie un msg a mon joey d'amour qu'a lui seul et il peut faire son meilleur copier coller
 - [ ] Possibilité de synchro avec Notion pour voir les leçons à faire pour le lendemain ET les DS
 - [ ] Faire une commande pour voir les classe 
-- [X] fait gaffe au commandes en dm																									
+- [X] fait gaffe au commandes en dm
+- [ ] Faire le message de bienvenue

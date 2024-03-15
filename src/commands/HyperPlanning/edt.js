@@ -43,13 +43,13 @@ module.exports = {
 				.setAutocomplete(true)
 				.setRequired(false)
 			)
-			.addUserOption(option => option.setName('utilisateur').setDescription('L\'utilisateur cible'))
 			.addStringOption(option => option
 				.setName('date')
 				.setDescription('La date que vous souhaitez consulter')
 				.setAutocomplete(true)
 				.setRequired(false)
 			)
+			.addUserOption(option => option.setName('utilisateur').setDescription('L\'utilisateur cible'))
 
 		)
 		.addSubcommand(subcommand => subcommand
@@ -61,13 +61,13 @@ module.exports = {
 				.setAutocomplete(true)
 				.setRequired(false)
 			)
-			.addUserOption(option => option.setName('utilisateur').setDescription('L\'utilisateur cible'))
 			.addStringOption(option => option
 				.setName('date')
 				.setDescription('La date que vous souhaitez consulter')
 				.setAutocomplete(true)
 				.setRequired(false)
 			)
+			.addUserOption(option => option.setName('utilisateur').setDescription('L\'utilisateur cible'))
 		)
 		.toJSON(),
 	userPermissions: [PermissionFlagsBits.SendMessages],
@@ -140,13 +140,13 @@ module.exports = {
 	},
 
 	run: async (client, interaction) => {
-		
+
 		let startTime = Date.now();
 		let classe;
 		const { options, guildId, guild } = interaction;
 		const iclasse = interaction.options.getString('classe');
 		await interaction.deferReply({ content: 'Traitement en cours ...' });
-		
+
 		const utilisateur = interaction.options.getUser('utilisateur') || interaction.user;
 		const dataDB = await user.findOne({ UserId: utilisateur.id });
 		if (interaction.options.getUser('utilisateur')) {
@@ -214,9 +214,9 @@ module.exports = {
 
 		events = Object.values(data).filter(ev => ev.type === 'VEVENT' && new Date(ev.start).setHours(0, 0, 0, 0) === now.setHours(0, 0, 0, 0));
 
-		// console.log(events);
+		console.log(events);
 		if (events.length === 0) {
-			return interaction.editReply({ embeds: [new EmbedBuilder().setTitle(`Emploi du temps du ${now.toLocaleDateString('fr-FR')}`).setColor('#0099ff').setDescription('Aucun cours ! va dormir !').setTimestamp()] });
+			return interaction.editReply({ embeds: [new EmbedBuilder().setTitle(`Emploi du temps du ${now.toLocaleDateString('fr-FR')}`).setColor('#0099ff').setDescription('Aucun cours ! Va dormir !').setTimestamp()] });
 		}
 		// --------------------------------------------------------------------------------------------------------------------------------------------------------------
 		// // Assurez-vous qu'il y a au moins un événement dans le tableau
@@ -315,7 +315,7 @@ module.exports = {
 
 				const browser = await getBrowser();
 				const page = await browser.newPage();
-				
+
 
 				const pageHeight = 500 + events.length * 100;
 				await page.setViewport({ width: 450, height: pageHeight, deviceScaleFactor: 5 });
