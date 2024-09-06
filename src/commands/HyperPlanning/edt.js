@@ -6,8 +6,10 @@ const getClass = require('../../../src/utils/edtInfo.json');
 const ical = require('node-ical');
 const { getBrowser } = require('../../../src/events/ready/consoleLog.js');
 
+const os = require('os');
 const fs = require('fs');
 const path = require('path');
+
 
 
 const user	 = require('../../schemas/user');
@@ -350,7 +352,10 @@ module.exports = {
 
 				// output du fichier
 				let rnd = Math.floor(Math.random() * 1000000);
-				await page.screenshot({ path: `stdout/output_${rnd}.png` });
+				const tempDir = os.tmpdir();
+				const tempImagePath = path.join(tempDir, `output_${rnd}.png`);
+
+				await page.screenshot({ path: tempImagePath });
 				await page.close();
 
 				let timeGeneration = (Date.now() - startTime) /1000;
@@ -362,7 +367,7 @@ module.exports = {
 
 
 				// -----------------------------------------------
-				const attachment = new AttachmentBuilder(`./stdout/output_${rnd}.png`, `output_${rnd}.png`);
+				const attachment = new AttachmentBuilder(tempImagePath, `output_${rnd}.png`);
 
 				const Buttons = new ActionRowBuilder().setComponents(
 					new ButtonBuilder().setCustomId("restartBtn").setLabel("Recharger").setStyle(ButtonStyle.Primary),
@@ -423,7 +428,10 @@ module.exports = {
 					// components: [Buttons]
 				});
 
-				fs.unlinkSync(`./stdout/output_${rnd}.png`);
+				fs.unlink(tempImagePath, (err) => {
+					if (err) throw err;
+					// Image supprimée
+				});
 				// await console.log('Image supprimée');
 
 				break;
