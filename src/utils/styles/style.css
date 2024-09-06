@@ -86,7 +86,7 @@
 }
 
 .main .grid-edt .item .center .show-items .in p {
-	font-size: 0.75rem;
+	font-size: 1rem;
 	font-weight: 200;
 	margin: 0 2px;
 	max-width: 40vw;
@@ -120,15 +120,15 @@
 }
 
 .main .grid-edt .end .show-items .in {
-	color: #8D6565;
+	color: #000000;
 }
 
 .main .grid-edt .active .show-items .in {
-	color: #64874E;
+	color: #000000;
 }
 
 .main .grid-edt .soon .show-items .in {
-	color: #405384;
+	color: #000000;
 }
 
 .card {

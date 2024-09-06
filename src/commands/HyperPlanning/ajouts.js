@@ -7,7 +7,7 @@ const ajoutSchema = require('../../schemas/ajouts');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ajouts')
-		.setDescription('Vous avec un idée à ajouter au bot ?')
+		.setDescription('Vous avez une idée à ajouter au bot ?')
 		.addSubcommand(sub => sub
 			.setName('add')
 			.setDescription('Votre idée pour le bot')
@@ -25,7 +25,6 @@ module.exports = {
 	deleted: false,
 
 
-	
 	run: async (client, interaction) => {
 
 

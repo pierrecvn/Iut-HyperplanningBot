@@ -24,7 +24,7 @@ module.exports = {
 			});
 
 			const rEmbed = new EmbedBuilder()
-				.setTitle(`Ajout au groupe : ${interaction.user.username}`)
+				.setTitle(`Changement de groupe : ${interaction.user.username}`)
 				.setColor('#00FF00')
 				.setFooter({
 					text: ` setdefautgroupe `,

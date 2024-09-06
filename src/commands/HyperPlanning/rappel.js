@@ -29,7 +29,7 @@ module.exports = {
 	runAutocomplete: async (client, interaction) => {
 
 		const focusedOption = interaction.options.getFocused(true);
-		const choices = ["5 min avant le cours", "10 min avant le cours", "15 min avant le cours", "20 min avant le cours", "30 min avant le cours", "40 min avant le cours"]
+		const choices = ["5 min avant le cours", "10 min avant le cours", "15 min avant le cours", "20 min avant le cours", "25 min avant le cours", "30 min avant le cours", "35 min avant le cours", "40 min avant le cours", "45 min avant le cours", "50 min avant le cours", "55 min avant le cours", "1h avant le cours"]
 		const filtered = choices.filter(choice => choice.includes(focusedOption.value.toLowerCase()));
 		const filteredLimit = filtered.slice(0, 25);
 		await interaction.respond(filteredLimit.map(choice => ({ name: choice, value: choice })));
@@ -46,7 +46,7 @@ module.exports = {
 		const member = await user.findOne({ UserId: interaction.user.id });
 		try {
 
-			if (!member || !member.Group) {
+			if (!member.Group) {
 				return interaction.reply({
 					embeds: [new EmbedBuilder()
 						.setTitle('Groupe par défaut non défini')
@@ -56,6 +56,7 @@ module.exports = {
 							{ name: ':warning: Pensez à définir votre classe par défaut', value: '``/setdefautgroupe``', inline: false },
 							{ name: 'Pour avoir l\'emploi du temps d\'une autre classe : ', value: '``/edtimage <la classe> ``', inline: false },
 							{ name: 'Ajouter les rappels de cours : ', value: '``/rappel <temps> <vrai/faux> ``', inline: false },
+
 						)
 						.setTimestamp()]
 					,
@@ -67,7 +68,7 @@ module.exports = {
 
 			let rappel = await Rappel.findOneAndUpdate({ userId: interaction.user.id }, { active: activer, time: choix }, { upsert: true, new: true });
 
-			await interaction.reply({ content: `Les rappels on été ${activer ? `\`Activé\`` + " :white_check_mark:" : `\`Désactivé\`` + ":x:"} à ${choix} \n${activer ?  `:warning:\` Le rappel prendra effet dans 15 min\`` : ""}`, ephemeral: true });
+			await interaction.reply({ content: `Les rappels on été ${activer ? `\`Activé\`` + " :white_check_mark:" : `\`Désactivé\`` + ":x:"} à ${choix}`, ephemeral: true });
 
 			// if (rappel && rappel.active) {
 			// 	await interaction.user.send(`Les rappels on été ${activer ? `\`Activé\`` + " :white_check_mark:" : `\`Désactivé\`` + ":x:"} à ${choix}`);

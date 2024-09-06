@@ -14,7 +14,6 @@ module.exports = {
 		.toJSON(),
 	userPermissions: [],
 	botPermissions: [],
-	sendDM : false,
 	run: async (client, interaction) => {
 		await interaction.deferReply({ ephemeral: true });
 

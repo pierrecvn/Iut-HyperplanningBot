@@ -18,6 +18,7 @@ module.exports = async (client, interaction) => {
 		// ajoute un +1 au compteur de commandes utilisées
 
 
+
 		const commandObject = localCommands.find(
 			(cmd) => cmd.data.name === interaction.commandName
 		);
@@ -47,81 +48,6 @@ module.exports = async (client, interaction) => {
 					LastCommand: Date.now()
 				});
 				newUser.save();
-
-				// let userInteraction = client.users.cache.get(interaction.user.id);
-				// let dmChannel = userInteraction.dmChannel;
-				// dmChannel = await userInteraction.createDM();
-				
-				// /// msg de bienvenue
-				// const fs = require('fs');
-				// const footerData = require('../../messageConfig.json')
-				
-				// const commandFolders = fs.readdirSync('./src/commands/');
-				
-				// const newEmbed = new EmbedBuilder()
-
-				// for (const folder of commandFolders) {
-
-				// 	if (folder === 'misc') {
-				// 		continue;
-				// 	}
-				// 	const commandFlles = fs.readdirSync(`./src/commands/${folder}/`).filter(file => file.endsWith('.js'));
-				// 	const categoryEmbed = new EmbedBuilder()
-				// 		.setTitle(folder)
-				// 		.setColor('Random')
-				// 		.setFooter({
-				// 			text: `${footerData.footerText}`
-				// 		})
-				// 		.setTimestamp()
-				// 		.setThumbnail(client.user.displayAvatarURL());
-
-				// 	const subcommands = [];
-
-
-				// 	for (const file of commandFlles) {
-				// 		const command = require(`./../../commands/${folder}/${file}`);
-
-				// 		if (command.deleted) {
-				// 			continue;
-				// 		}
-
-
-				// 		const description = `${command.data.description || "Pas de description"}`;
-
-				// 		if (command.data.type === 'SUB_COMMAND' || command.data.type === 'SUB_COMMAND_GROUP') {
-				// 			subcommands.push(command);
-				// 		} else {
-				// 			categoryEmbed.addFields({
-				// 				name: `/${command.data.name}`,
-				// 				value: `${description}`
-				// 			})
-				// 		}
-				// 	}
-
-				// 	if (subcommands.length > 0) {
-				// 		categoryEmbed.addFields({
-				// 			name: `Sous-commandes`,
-				// 			value: subcommands.map(subcommand => `/${subcommand.data.name}`).join('\n')
-				// 		})
-				// 	}
-
-
-				// 	newEmbed.addFields({
-				// 		name: `Commandes`,
-				// 		value: categoryEmbed
-				// 	})
-				// }
-		
-		
-
-
-
-
-
-
-
-				// await dmChannel.send({ embeds: [newEmbed] });
-
 			}
 		} else {
 			if (userStats) {
@@ -205,7 +131,7 @@ module.exports = async (client, interaction) => {
 
 		await commandObject.run(client, interaction);
 	} catch (err) {
-		// console.log(`Une erreur s'est produite lors de la validation des commandes de saisie de chat ! ${err}`.red);
-		console.log(err);
+		console.log(`Une erreur s'est produite lors de la validation des commandes de saisie de chat ! ${err}`.red);
+		// console.log(err);
 	}
 };
