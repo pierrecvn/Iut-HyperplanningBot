@@ -1,3 +1,7 @@
 
 /node_modules
 .env
+updateDB
+updateUser
+src/utils/updateDB.js
+src/utils/updateUser.js
