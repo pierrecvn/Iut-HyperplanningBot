@@ -44,7 +44,7 @@ RUN npx puppeteer browsers install firefox
 COPY . .
 
 # Exposer le port sur lequel l'application s'exécute
-EXPOSE 7700
+# EXPOSE 7700
 
 # Définir la commande pour exécuter l'application
 CMD [ "npm", "start" ]

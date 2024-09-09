@@ -66,7 +66,10 @@ module.exports = {
 
 
 
-			let rappel = await Rappel.findOneAndUpdate({ userId: interaction.user.id }, { active: activer, time: choix }, { upsert: true, new: true });
+
+			await Rappel.findOneAndUpdate({ userId: interaction.user.id }, { active: activer, time: choix }, { upsert: true, new: true });
+
+
 
 			await interaction.reply({ content: `Les rappels on été ${activer ? `\`Activé\`` + " :white_check_mark:" : `\`Désactivé\`` + ":x:"} à ${choix}`, ephemeral: true });
 

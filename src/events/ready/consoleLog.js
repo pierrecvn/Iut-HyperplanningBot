@@ -20,7 +20,7 @@ async function launchBrowser() {
 			console.error("Erreur lors du lancement du moteur Image:".red, error);
 		}
 	} else {
-		console.log("Déja actif".yellow);
+		// console.log("Déja actif".yellow);
 	}
 	return browser;
 }

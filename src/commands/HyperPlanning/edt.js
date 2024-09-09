@@ -194,7 +194,7 @@ module.exports = {
 		events = Object.values(data).filter(ev => ev.type === 'VEVENT' && new Date(ev.start).setHours(0, 0, 0, 0) === now.setHours(0, 0, 0, 0));
 
 		if (events.length === 0) {
-			return interaction.editReply({ embeds: [new EmbedBuilder().setTitle(`Emploi du temps du ${now.toLocaleDateString('fr-FR')}`).setColor('#0099ff').setDescription('Aucun cours ! va dormir !').setTimestamp()] });
+			return interaction.editReply({ embeds: [new EmbedBuilder().setTitle(`Emploi du temps du ${now.toLocaleDateString('fr-FR')}`).setColor('#0099ff').setDescription('Aucun cours aujourd\'hui !').setTimestamp()] });
 		}
 
 		events.sort((a, b) => a.start - b.start);
@@ -237,7 +237,7 @@ module.exports = {
 								{ name: 'Début', value: startString, inline: true },
 								{ name: 'Fin', value: endString, inline: true },
 								{ name: '\u200B', value: '\u200B', inline: true },
-								{ name: 'Temps avant bébut', value: timeRemainingString, inline: true },
+								{ name: 'Temps avant début', value: timeRemainingString, inline: true },
 								{ name: 'Temps avant fin', value: timeToEndString, inline: true },
 							);
 					}

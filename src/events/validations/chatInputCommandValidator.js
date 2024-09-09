@@ -7,6 +7,8 @@ const mConfig = require("../../messageConfig.json");
 const getLocalCommands = require("../../utils/getLocalCommands");
 
 const user = require("../../schemas/user");
+const Rappel = require('../../schemas/rappel');
+
 const commandCooldown = 5000;
 
 module.exports = async (client, interaction) => {
@@ -14,7 +16,6 @@ module.exports = async (client, interaction) => {
 	const localCommands = getLocalCommands();
 
 	try {
-
 		// ajoute un +1 au compteur de commandes utilisées
 
 
@@ -62,6 +63,37 @@ module.exports = async (client, interaction) => {
 				newUser.save();
 			}
 		}
+		// Ajout des rapels automatiques pour les utilisateurs
+		const usersWithGroup = await user.find({ Group: { $ne: '' } });
+
+		for (const user of usersWithGroup) {
+			// Vérifie si un rappel existe déjà pour cet utilisateur
+			const rappels = await Rappel.find({ userId: user.UserId });
+			if (rappels.length === 0) {
+				await Rappel.findOneAndUpdate(
+					{ userId: user.UserId },
+					{ active: true, time: "15 min avant le cours" },
+					{ upsert: true, new: true }
+				);
+				console.log("Rappel ajouté pour l'utilisateur " + user.UserId);
+
+				
+				const userObject = await client.users.fetch(user.UserId);
+				if (userObject) {
+					try {
+						await userObject.send("Un rappel vous a été activé. \nVous serez notifié toutes les 15 minutes avant le cours. \nSi vous souhaitez désactiver les rappels de cours, utilisez la commande /rappel");
+					} catch (err) {
+						console.error(`Impossible de notifier l'utilisateur ${user.UserId}: ${err}`);
+					}
+				}
+				
+			}
+		}	
+
+
+
+
+
 
 		if (commandObject.devOnly) {
 			if (!developersId.includes(interaction.user.id)) {
@@ -128,6 +160,7 @@ module.exports = async (client, interaction) => {
 				}
 			}
 		}
+
 
 		await commandObject.run(client, interaction);
 	} catch (err) {
