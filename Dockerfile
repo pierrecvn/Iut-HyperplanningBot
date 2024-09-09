@@ -1,6 +1,9 @@
 # Utilisez une image Docker officielle Node.js comme image parente
 FROM node:20.17.0
 
+RUN timedatectl set-timezone Europe/Paris
+
+
 # Installer Firefox et les dépendances nécessaires pour Puppeteer
 RUN apt-get update && apt-get install -y \
     firefox-esr \
