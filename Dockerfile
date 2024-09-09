@@ -1,7 +1,7 @@
 # Utilisez une image Docker officielle Node.js comme image parente
 FROM node:20.17.0
 
-RUN timedatectl set-timezone Europe/Paris
+RUN ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime && echo "Europe/Paris" > /etc/timezone
 
 
 # Installer Firefox et les dépendances nécessaires pour Puppeteer
