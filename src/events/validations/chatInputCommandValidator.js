@@ -63,8 +63,16 @@ module.exports = async (client, interaction) => {
 				newUser.save();
 			}
 		}
-		// Ajout des rapels automatiques pour les utilisateurs
-		const usersWithGroup = await user.find({ Group: { $ne: '' } });
+
+		
+
+		// Ajout des rappels automatiques pour les utilisateurs qui ont un groupe
+		const usersWithGroup = await user.find({
+			$and: [
+				{ Group: { $ne: null } },
+				{ Group: { $ne: '' } }
+			]
+		});
 
 		for (const user of usersWithGroup) {
 			// Vérifie si un rappel existe déjà pour cet utilisateur
@@ -77,7 +85,6 @@ module.exports = async (client, interaction) => {
 				);
 				console.log("Rappel ajouté pour l'utilisateur " + user.UserId);
 
-				
 				const userObject = await client.users.fetch(user.UserId);
 				if (userObject) {
 					try {
@@ -86,11 +93,8 @@ module.exports = async (client, interaction) => {
 						console.error(`Impossible de notifier l'utilisateur ${user.UserId}: ${err}`);
 					}
 				}
-				
 			}
-		}	
-
-
+		}
 
 
 
