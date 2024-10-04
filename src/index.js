@@ -1,4 +1,6 @@
-require("dotenv/config");
+require('dotenv').config();
+
+
 
 const { Client, GatewayIntentBits } = require("discord.js");
 const eventHandler = require("./handlers/eventHandler");

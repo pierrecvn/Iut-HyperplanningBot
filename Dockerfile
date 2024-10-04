@@ -38,6 +38,7 @@ WORKDIR /usr/src/app
 # Copier package.json et package-lock.json (si disponible)
 COPY package*.json ./
 
+COPY .env .
 # Installer les dépendances de l'application
 RUN npm install
 

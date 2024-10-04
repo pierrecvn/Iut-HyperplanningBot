@@ -11,6 +11,8 @@ module.exports = (client) => {
 
 		eventName === "validations" ? eventName = "interactionCreate" : eventName;
 
+		console.log(`Loading event: ${eventName}`);
+
 		client.on(eventName, async (arg) => {
 			for (const eventFile of eventFiles) {
 				const eventFunction = require(eventFile);

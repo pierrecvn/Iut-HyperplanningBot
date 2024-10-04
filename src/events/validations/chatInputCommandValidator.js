@@ -168,7 +168,7 @@ module.exports = async (client, interaction) => {
 
 		await commandObject.run(client, interaction);
 	} catch (err) {
-		console.log(`Une erreur s'est produite lors de la validation des commandes de saisie de chat ! ${err}`.red);
-		// console.log(err);
+		// console.log(`Une erreur s'est produite lors de la validation des commandes de saisie de chat ! ${err}`.red);
+		console.log(err);
 	}
 };

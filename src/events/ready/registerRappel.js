@@ -121,6 +121,6 @@ module.exports = async (client) => {
 
 
 
-	const intervalTime = 15 * 60 * 1000;
+	const intervalTime = 20 * 60 * 1000; // toutes les 15 minutes reactualise la base des rappels 
 	setInterval(mainFunction, intervalTime);
 }
