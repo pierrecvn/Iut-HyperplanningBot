@@ -1,29 +1,30 @@
 {
-	"name": "HyperplanningBot",
-	"version": "1.1.0",
-	"description": "",
-	"main": "src/index.js",
-	"scripts": {
-		"start": "node --no-warnings .",
-		"dev": "nodemon --no-warnings .",
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"author": "Sajima",
-	"license": "ISC",
-	"dependencies": {
-		"colors": "^1.4.0",
-		"discord.js": "^14.13.0",
-		"dotenv": "^16.3.1",
-		"HyperplanningBot": "file:",
-		"ical.js": "^2.1.0",
-		"mongoose": "^7.5.2",
-		"node-cache": "^5.1.2",
-		"node-fetch": "^2.7.0",
-		"node-ical": "^0.17.2",
-		"node-schedule": "^2.1.1",
-		"nodemon": "^3.0.1",
-		"puppeteer": "^22.15.0",
-		"puppeteer-core": "^22.15.0",
-		"uuid": "^9.0.1"
-	}
+  "name": "hyperplanning-bot",
+  "version": "2.0.0",
+  "description": "Bot Discord Hyperplanning - IUT Le Havre",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && cp -r src/assets dist/assets",
+    "start": "node --no-warnings dist/index.js",
+    "dev": "tsx --no-warnings src/index.ts"
+  },
+  "author": "Sajima",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.96.0",
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.3.1",
+    "ical.js": "^2.2.1",
+    "node-cache": "^5.1.2",
+    "node-ical": "^0.25.2",
+    "node-schedule": "^2.1.1",
+    "puppeteer": "^24.37.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@types/node-schedule": "^2.1.8",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
 }

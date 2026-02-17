@@ -1,0 +1,22 @@
+{
+  "commandDmOnly": "`\u274c` Cette commande ne peut pas etre executee dans les messages prives.",
+  "embedErrorMessage": "`\u274c` Une erreur s'est produite !",
+  "commandDevOnly": "`\u274c` Cette commande ne peut etre executee que par les developpeurs.",
+  "commandTimeOut": "`\u274c` Vous envoyez trop de commandes. Veuillez attendre un moment.",
+  "userNoPermissions": "`\u274c` Vous n'avez pas suffisamment de permissions pour executer cette commande.",
+  "botNoPermissions": "`\u274c` Je n'ai pas suffisamment de permissions pour executer cette commande.",
+  "cannotUseButton": "`\u274c` Vous ne pouvez pas utiliser ce bouton.",
+  "cannotUseSelect": "`\u274c` Vous ne pouvez pas utiliser ce menu.",
+  "footerText": "Cree par Sajima",
+  "noGroupTitle": "Groupe non defini",
+  "noGroupDescription": "Vous devez d'abord definir votre groupe pour utiliser cette commande.",
+  "noGroupSetup": "Utilisez `/setgroupe` pour choisir votre groupe.",
+  "onboardingWelcomeTitle": "Bienvenue sur le serveur !",
+  "onboardingWelcomeDescription": "Pour acceder a toutes les fonctionnalites, configurez votre profil.",
+  "onboardingButtonLabel": "Configurer mon profil",
+  "onboardingSelectPlaceholder": "Choisissez votre groupe",
+  "onboardingModalTitle": "Vos informations",
+  "onboardingModalFirstName": "Prenom",
+  "onboardingModalLastName": "Nom",
+  "bienvenueChannelDescription": "Bienvenue sur le serveur ! Pour acceder aux salons et a toutes les fonctionnalites, configurez votre profil en cliquant sur le bouton ci-dessous."
+}

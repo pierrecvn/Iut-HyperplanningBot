@@ -3,3 +3,4 @@
 .env
 src/utils/updateDB.js
 src/utils/updateUser.js
+dist
