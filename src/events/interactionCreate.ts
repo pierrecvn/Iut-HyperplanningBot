@@ -66,11 +66,10 @@ export async function handleInteraction(client: Client, interaction: Interaction
       return;
     }
 
-    // Autocomplete
     if (interaction.isAutocomplete()) {
       const command = commands.get(interaction.commandName);
       if (command?.runAutocomplete) {
-        await command.runAutocomplete(client, interaction);
+        await command.runAutocomplete(client, interaction).catch(() => {});
       }
       return;
     }
@@ -95,7 +94,11 @@ export async function handleInteraction(client: Client, interaction: Interaction
       if (handler) await handler(client, interaction);
       return;
     }
-  } catch (err) {
+  } catch (err: any) {
+    // Silently ignore common Discord race conditions
+    const code = err?.code;
+    if (code === 10062 || code === 40060) return; // Unknown interaction / Already acknowledged
+
     console.error('[InteractionCreate] Erreur:', err);
     const reply = { embeds: [new EmbedBuilder().setColor(Colors.error).setDescription(messages.embedErrorMessage)], ephemeral: true };
     if (interaction.isRepliable()) {
