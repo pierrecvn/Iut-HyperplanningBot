@@ -57,6 +57,32 @@ export const edtCommand: BotCommand = {
     const specifiedClass = interaction.options.getString('classe');
     const group = specifiedClass ?? await getUserGroup(targetUser.id);
 
+    // --- MODE TEST : /edt image classe:TEST ---
+    if (specifiedClass?.toUpperCase() === 'TEST') {
+      const now = new Date();
+      const make = (offStart: number, offEnd: number, summary: string, location: string): ICalEvent => ({
+        type: 'VEVENT', uid: Math.random().toString(), description: '',
+        summary, location,
+        start: new Date(now.getTime() + offStart * 60000),
+        end: new Date(now.getTime() + offEnd * 60000),
+      });
+      const events: ICalEvent[] = [
+        make(-180, -120, 'R1.01 Initiation au developpement', 'Salle A201'),
+        make(-120, -60, 'Cours annule : R1.02 Dev Web', 'Salle B102'),
+        make(-30, 60, 'R2.03 Qualite de developpement', 'Salle C305'),
+        make(120, 180, 'R3.04 Base de donnees', 'Amphi B'),
+        make(180, 240, 'R4.05 Mathematiques', 'Salle D110'),
+      ];
+      const sub = interaction.options.getSubcommand();
+      if (sub === 'texte') {
+        await sendTextEdt(interaction, events);
+      } else {
+        await sendImageEdt(interaction, events, now, 'TEST MODE', startTime);
+      }
+      return;
+    }
+    // --- FIN MODE TEST ---
+
     if (!group) {
       await interaction.editReply({ embeds: [noGroupEmbed()] });
       return;

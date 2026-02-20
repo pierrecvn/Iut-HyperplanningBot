@@ -3,6 +3,7 @@
 * {
 	margin: 0;
 	padding: 0;
+	box-sizing: border-box;
 	font-family: 'Outfit', sans-serif;
 }
 body {
@@ -46,6 +47,7 @@ body {
 	border-radius: 10px;
 	display: flex;
 	align-items: center;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .main .grid-edt .item .start {
@@ -71,14 +73,15 @@ body {
 
 .main .grid-edt .item .center .show-items {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
+	gap: 2px 10px;
 	margin-top: 8px;
 }
 
 .main .grid-edt .item .center .show-items .in {
 	display: flex;
 	align-items: center;
-	margin-right: 5px;
 }
 
 .main .grid-edt .item .center .show-items .in span {
@@ -129,6 +132,33 @@ body {
 
 .main .grid-edt .soon .show-items .in {
 	color: #000000;
+}
+
+.progress-container {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.progress-bar {
+	flex: 1;
+	height: 5px;
+	background: rgba(0, 0, 0, 0.1);
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	background: #3da32a;
+	border-radius: 5px;
+}
+
+.progress-text {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: #3da32a;
 }
 
 .card {

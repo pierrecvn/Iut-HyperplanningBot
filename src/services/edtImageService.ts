@@ -23,9 +23,12 @@ const COLOR_COMBOS = [
   ['rgba(255, 247, 165, 0.6)', 'rgba(165, 223, 255, 0.6)'],
 ];
 
-/** Injecte du HTML dans .grid-edt via page.evaluate (string mode) */
-async function appendToGrid(page: Awaited<ReturnType<import('puppeteer').Browser['newPage']>>, html: string): Promise<void> {
-  await page.evaluate(`document.querySelector('.grid-edt').innerHTML += \`${html.replace(/`/g, '\\`')}\``);
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 export async function generateEdtImage(
@@ -33,69 +36,50 @@ export async function generateEdtImage(
   date: Date,
   title: string,
 ): Promise<{ imagePath: string; currentEvent: ICalEvent | null }> {
-  const htmlContent = fs.readFileSync(path.join(ASSETS_DIR, 'index.html'), 'utf8');
   const cssContent = fs.readFileSync(path.join(ASSETS_DIR, 'style.css'), 'utf8');
 
-  const browser = await getBrowser();
-  const page = await browser.newPage();
-
-  const pageHeight = 500 + events.length * 100;
-  await page.setViewport({ width: 450, height: pageHeight, deviceScaleFactor: 2 });
-
-  await page.setContent(htmlContent);
-  await page.addStyleTag({ content: cssContent });
-
-  // Set date
-  const dateFormatted = formaterDateFr(date);
-  await page.evaluate(`document.querySelector('.time').innerHTML += '<p>${dateFormatted.replace(/'/g, "\\'")}</p>'`);
-
-  // Set title
-  await page.evaluate(`{
-    const el = document.querySelector('.title h1');
-    if (el) el.textContent = '${title.replace(/'/g, "\\'")}';
-  }`);
-
+  const now = new Date();
   let currentEvent: ICalEvent | null = null;
   let prevEnd: Date | null = null;
-  let endOfDayMsg = '';
 
   const lastEvent = events[events.length - 1];
   const lastEnd = new Date(lastEvent.end);
-  const now = new Date();
+  const endOfDayMsg = now > lastEnd
+    ? 'Journee Terminee !!'
+    : `Fin de journee dans : ${formaterDuree(lastEnd.getTime() - now.getTime())}`;
 
-  if (now > lastEnd) {
-    endOfDayMsg = 'Journee Terminee !!';
-  } else {
-    endOfDayMsg = `Fin de journee dans : ${formaterDuree(lastEnd.getTime() - now.getTime())}`;
-  }
+  // Build all event cards HTML
+  let gridHtml = '';
 
   for (const ev of events) {
     const start = new Date(ev.start);
     const end = new Date(ev.end);
     const summary = getSummary(ev);
     const location = getLocation(ev);
+    const durationMs = end.getTime() - start.getTime();
 
     let statusClass: string;
-    let displaySummary = summary;
+    let displaySummary: string;
 
     if (summary.startsWith('Cours annule')) {
-      displaySummary = `<s>${summary}</s>`;
+      displaySummary = `<s>${escapeHtml(summary)}</s>`;
       statusClass = 'end';
     } else if (now > end) {
+      displaySummary = escapeHtml(summary);
       statusClass = 'end';
     } else if (now >= start && now <= end) {
+      displaySummary = escapeHtml(summary);
       statusClass = 'active';
       currentEvent = ev;
     } else {
+      displaySummary = escapeHtml(summary);
       statusClass = 'soon';
     }
 
     // Lunch break detection
     if (prevEnd && start.getTime() - prevEnd.getTime() > 0.75 * 60 * 60 * 1000) {
-      const pauseHtml = `<div class="card"><span class="material-symbols-rounded">flatware</span><p>Pause Midi de ${formaterHeure(prevEnd)} a ${formaterHeure(start)} - (${formaterDuree(start.getTime() - prevEnd.getTime())})</p></div>`;
-      await appendToGrid(page, pauseHtml);
+      gridHtml += `<div class="card"><span class="material-symbols-rounded">flatware</span><p>Pause Midi de ${formaterHeure(prevEnd)} a ${formaterHeure(start)} - (${formaterDuree(start.getTime() - prevEnd.getTime())})</p></div>`;
     }
-
     prevEnd = end;
 
     // Time display
@@ -108,7 +92,19 @@ export async function generateEdtImage(
       timeText = `Dans ${calculerTempsRestant(start, now)}`;
     }
 
-    const courseHtml = `
+    // Progress bar for active course
+    let progressHtml = '';
+    if (statusClass === 'active' && !summary.startsWith('Cours annule')) {
+      const elapsed = now.getTime() - start.getTime();
+      const pct = Math.min(100, Math.max(0, Math.round((elapsed / durationMs) * 100)));
+      progressHtml = `
+          <div class="progress-container">
+            <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+            <span class="progress-text">${pct}%</span>
+          </div>`;
+    }
+
+    gridHtml += `
       <div class="item ${statusClass}">
         <div class="start">
           <p>${formaterHeure(start)}</p>
@@ -119,53 +115,86 @@ export async function generateEdtImage(
           <div class="show-items">
             <div class="in">
               <span class="material-symbols-rounded">door_open</span>
-              <p>${location}</p>
+              <p>${escapeHtml(location)}</p>
             </div>
             <div class="in">
               <span class="material-symbols-rounded">alarm</span>
-              <p>${timeText}</p>
+              <p>${escapeHtml(timeText)}</p>
+            </div>
+            <div class="in">
+              <span class="material-symbols-rounded">schedule</span>
+              <p>${formaterDuree(durationMs)}</p>
             </div>
           </div>
+          ${progressHtml}
         </div>
       </div>`;
-
-    await appendToGrid(page, courseHtml);
   }
 
   // End of day
-  await appendToGrid(page, `<div class="card"><span class="material-symbols-rounded">flag</span><p>${endOfDayMsg}</p></div>`);
+  gridHtml += `<div class="card"><span class="material-symbols-rounded">flag</span><p>${endOfDayMsg}</p></div>`;
 
-  // Random gradient
+  // Background
   const combo = COLOR_COMBOS[Math.floor(Math.random() * COLOR_COMBOS.length)];
-
-  // Easter egg (0.01%)
   const isEgg = Math.random() < 0.0001;
   const eggPath = path.join(ASSETS_DIR, 'egg.png');
 
+  let mainBg: string;
+  let titleBg: string;
   if (isEgg && fs.existsSync(eggPath)) {
     const base64 = fs.readFileSync(eggPath, { encoding: 'base64' });
-    await page.evaluate(`{
-      const style = 'url(data:image/png;base64,${base64})';
-      document.querySelector('.main').style.background = style;
-      document.querySelector('.main').style.backgroundSize = 'cover';
-      document.querySelector('.title').style.background = style;
-      document.querySelector('.title').style.backgroundSize = 'cover';
-    }`);
+    mainBg = `background: url(data:image/png;base64,${base64}) center/cover;`;
+    titleBg = mainBg;
   } else {
-    await page.evaluate(`{
-      const style = 'linear-gradient(135deg, ${combo[0]} 0%, ${combo[1]} 100%)';
-      document.querySelector('.main').style.background = style;
-      document.querySelector('.title').style.background = style;
-    }`);
+    const grad = `linear-gradient(135deg, ${combo[0]} 0%, ${combo[1]} 100%)`;
+    mainBg = `background: ${grad};`;
+    titleBg = `background: ${grad};`;
   }
 
-  // Attendre le chargement des fonts (Material Symbols)
+  const dateFormatted = formaterDateFr(date);
+
+  const fullHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>${cssContent}</style>
+</head>
+<body>
+  <div class="main" style="${mainBg}">
+    <div class="title" style="${titleBg}">
+      <h1>${escapeHtml(title)}</h1>
+    </div>
+    <div class="grid-edt">
+      <div class="card time">
+        <span class="material-symbols-rounded">schedule</span>
+        <p>${escapeHtml(dateFormatted)}</p>
+      </div>
+      ${gridHtml}
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+
+  const pageHeight = 500 + events.length * 110;
+  await page.setViewport({ width: 450, height: pageHeight, deviceScaleFactor: 2 });
+  await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
   await page.evaluateHandle('document.fonts.ready');
 
   const rnd = Math.floor(Math.random() * 1000000);
   const imagePath = path.join(os.tmpdir(), `edt_${rnd}.png`);
-  await page.screenshot({ path: imagePath });
-  await page.close();
 
+  // Crop sur le contenu réel
+  const mainEl = await page.$('.main');
+  if (mainEl) {
+    await mainEl.screenshot({ path: imagePath });
+  } else {
+    await page.screenshot({ path: imagePath });
+  }
+
+  await page.close();
   return { imagePath, currentEvent };
 }
