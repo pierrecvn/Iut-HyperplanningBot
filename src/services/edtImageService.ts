@@ -10,106 +10,22 @@ import type { ICalEvent } from '../types/index.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ASSETS_DIR = path.join(__dirname, '..', 'assets', 'styles');
 
-const GRADIENTS = [
-  ['#667eea', '#764ba2'],
-  ['#f093fb', '#f5576c'],
-  ['#4facfe', '#00f2fe'],
-  ['#43e97b', '#38f9d7'],
-  ['#fa709a', '#fee140'],
-  ['#a18cd1', '#fbc2eb'],
-  ['#fccb90', '#d57eeb'],
-  ['#e0c3fc', '#8ec5fc'],
-  ['#f5576c', '#ff9a9e'],
-  ['#3b82f6', '#8b5cf6'],
-  ['#06b6d4', '#6366f1'],
-  ['#f97316', '#ef4444'],
+const COLOR_COMBOS = [
+  ['rgba(255, 175, 189, 0.6)', 'rgba(100, 199, 255, 0.6)'],
+  ['rgba(255, 223, 242, 0.56)', 'rgba(250, 137, 137, 0.726)'],
+  ['rgba(130, 250, 177, 0.5)', 'rgba(255, 177, 153, 0.5)'],
+  ['rgba(255, 204, 204, 0.5)', 'rgba(153, 204, 255, 0.5)'],
+  ['rgba(170, 156, 255, 0.5)', 'rgba(255, 156, 156, 0.5)'],
+  ['rgba(105, 180, 255, 0.7)', 'rgba(255, 244, 117, 0.7)'],
+  ['rgba(255, 134, 194, 0.6)', 'rgba(134, 255, 233, 0.6)'],
+  ['rgba(208, 132, 255, 0.65)', 'rgba(255, 136, 136, 0.65)'],
+  ['rgba(255, 198, 165, 0.5)', 'rgba(165, 198, 255, 0.5)'],
+  ['rgba(255, 247, 165, 0.6)', 'rgba(165, 223, 255, 0.6)'],
 ];
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function buildEventHtml(ev: ICalEvent, statusClass: string, timeText: string, now: Date): string {
-  const start = new Date(ev.start);
-  const end = new Date(ev.end);
-  const summary = getSummary(ev);
-  const location = getLocation(ev);
-  const durationMs = end.getTime() - start.getTime();
-  const duration = formaterDuree(durationMs);
-  const cancelled = summary.startsWith('Cours annule');
-
-  const displaySummary = escapeHtml(summary);
-
-  // Badge
-  let badge: string;
-  if (cancelled) badge = 'Annulé';
-  else if (statusClass === 'ended') badge = 'Terminé';
-  else if (statusClass === 'active') badge = 'En cours';
-  else badge = 'À venir';
-
-  // Progress bar for active course
-  let progressHtml = '';
-  if (statusClass === 'active' && !cancelled) {
-    const elapsed = now.getTime() - start.getTime();
-    const pct = Math.min(100, Math.max(0, Math.round((elapsed / durationMs) * 100)));
-    progressHtml = `
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${pct}%"></div>
-        </div>
-        <span class="progress-text">${pct}%</span>
-      </div>`;
-  }
-
-  return `
-    <div class="event ${statusClass}${cancelled ? ' cancelled' : ''}">
-      <div class="event-dot"></div>
-      <div class="event-card">
-        <div class="event-header">
-          <div class="event-time-range">
-            <span class="time-start">${formaterHeure(start)}</span>
-            <span class="time-sep">→</span>
-            <span class="time-end">${formaterHeure(end)}</span>
-          </div>
-          <span class="badge badge-${statusClass}">${badge}</span>
-        </div>
-        <h2 class="event-title">${displaySummary}</h2>
-        <div class="event-details">
-          <div class="detail">
-            <span class="material-symbols-rounded">door_open</span>
-            <span>${escapeHtml(location)}</span>
-          </div>
-          <div class="detail">
-            <span class="material-symbols-rounded">schedule</span>
-            <span>${duration}</span>
-          </div>
-          <div class="detail">
-            <span class="material-symbols-rounded">alarm</span>
-            <span>${escapeHtml(timeText)}</span>
-          </div>
-        </div>
-        ${progressHtml}
-      </div>
-    </div>`;
-}
-
-function buildBreakHtml(prevEnd: Date, nextStart: Date): string {
-  const durationMs = nextStart.getTime() - prevEnd.getTime();
-  return `
-    <div class="break-card">
-      <div class="dot-break"></div>
-      <div class="break-content">
-        <span class="material-symbols-rounded">restaurant</span>
-        <div>
-          <p class="break-title">Pause déjeuner</p>
-          <p class="break-time">${formaterHeure(prevEnd)} → ${formaterHeure(nextStart)} · ${formaterDuree(durationMs)}</p>
-        </div>
-      </div>
-    </div>`;
+/** Injecte du HTML dans .grid-edt via page.evaluate (string mode) */
+async function appendToGrid(page: Awaited<ReturnType<import('puppeteer').Browser['newPage']>>, html: string): Promise<void> {
+  await page.evaluate(`document.querySelector('.grid-edt').innerHTML += \`${html.replace(/`/g, '\\`')}\``);
 }
 
 export async function generateEdtImage(
@@ -117,122 +33,139 @@ export async function generateEdtImage(
   date: Date,
   title: string,
 ): Promise<{ imagePath: string; currentEvent: ICalEvent | null }> {
+  const htmlContent = fs.readFileSync(path.join(ASSETS_DIR, 'index.html'), 'utf8');
   const cssContent = fs.readFileSync(path.join(ASSETS_DIR, 'style.css'), 'utf8');
 
-  const now = new Date();
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+
+  const pageHeight = 500 + events.length * 100;
+  await page.setViewport({ width: 450, height: pageHeight, deviceScaleFactor: 2 });
+
+  await page.setContent(htmlContent);
+  await page.addStyleTag({ content: cssContent });
+
+  // Set date
+  const dateFormatted = formaterDateFr(date);
+  await page.evaluate(`document.querySelector('.time').innerHTML += '<p>${dateFormatted.replace(/'/g, "\\'")}</p>'`);
+
+  // Set title
+  await page.evaluate(`{
+    const el = document.querySelector('.title h1');
+    if (el) el.textContent = '${title.replace(/'/g, "\\'")}';
+  }`);
+
   let currentEvent: ICalEvent | null = null;
   let prevEnd: Date | null = null;
+  let endOfDayMsg = '';
 
   const lastEvent = events[events.length - 1];
   const lastEnd = new Date(lastEvent.end);
-  const dayDone = now > lastEnd;
-  const endOfDayMsg = dayDone
-    ? 'Journée terminée !'
-    : `Fin de journée dans ${formaterDuree(lastEnd.getTime() - now.getTime())}`;
+  const now = new Date();
 
-  let eventsHtml = '';
+  if (now > lastEnd) {
+    endOfDayMsg = 'Journee Terminee !!';
+  } else {
+    endOfDayMsg = `Fin de journee dans : ${formaterDuree(lastEnd.getTime() - now.getTime())}`;
+  }
 
   for (const ev of events) {
     const start = new Date(ev.start);
     const end = new Date(ev.end);
     const summary = getSummary(ev);
+    const location = getLocation(ev);
 
     let statusClass: string;
+    let displaySummary = summary;
+
     if (summary.startsWith('Cours annule')) {
-      statusClass = 'ended';
+      displaySummary = `<s>${summary}</s>`;
+      statusClass = 'end';
     } else if (now > end) {
-      statusClass = 'ended';
+      statusClass = 'end';
     } else if (now >= start && now <= end) {
       statusClass = 'active';
       currentEvent = ev;
     } else {
-      statusClass = 'upcoming';
+      statusClass = 'soon';
     }
 
+    // Lunch break detection
     if (prevEnd && start.getTime() - prevEnd.getTime() > 0.75 * 60 * 60 * 1000) {
-      eventsHtml += buildBreakHtml(prevEnd, start);
+      const pauseHtml = `<div class="card"><span class="material-symbols-rounded">flatware</span><p>Pause Midi de ${formaterHeure(prevEnd)} a ${formaterHeure(start)} - (${formaterDuree(start.getTime() - prevEnd.getTime())})</p></div>`;
+      await appendToGrid(page, pauseHtml);
     }
+
     prevEnd = end;
 
+    // Time display
     let timeText: string;
-    if (statusClass === 'ended') {
+    if (statusClass === 'end') {
       timeText = calculerTempsRestant(end, now);
     } else if (statusClass === 'active') {
-      timeText = `Encore ${formaterDuree(end.getTime() - now.getTime())}`;
+      timeText = formaterDuree(end.getTime() - now.getTime());
     } else {
       timeText = `Dans ${calculerTempsRestant(start, now)}`;
     }
 
-    eventsHtml += buildEventHtml(ev, statusClass, timeText, now);
+    const courseHtml = `
+      <div class="item ${statusClass}">
+        <div class="start">
+          <p>${formaterHeure(start)}</p>
+          <p>${formaterHeure(end)}</p>
+        </div>
+        <div class="center">
+          <h2>${displaySummary}</h2>
+          <div class="show-items">
+            <div class="in">
+              <span class="material-symbols-rounded">door_open</span>
+              <p>${location}</p>
+            </div>
+            <div class="in">
+              <span class="material-symbols-rounded">alarm</span>
+              <p>${timeText}</p>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    await appendToGrid(page, courseHtml);
   }
 
-  const endIcon = dayDone ? 'celebration' : 'flag';
-  eventsHtml += `
-    <div class="end-card">
-      <div class="dot-end"></div>
-      <div class="end-content">
-        <span class="material-symbols-rounded">${endIcon}</span>
-        <p>${endOfDayMsg}</p>
-      </div>
-    </div>`;
+  // End of day
+  await appendToGrid(page, `<div class="card"><span class="material-symbols-rounded">flag</span><p>${endOfDayMsg}</p></div>`);
 
-  // Background
-  const gradient = GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)];
+  // Random gradient
+  const combo = COLOR_COMBOS[Math.floor(Math.random() * COLOR_COMBOS.length)];
+
+  // Easter egg (0.01%)
   const isEgg = Math.random() < 0.0001;
   const eggPath = path.join(ASSETS_DIR, 'egg.png');
-  let bgStyle: string;
 
   if (isEgg && fs.existsSync(eggPath)) {
     const base64 = fs.readFileSync(eggPath, { encoding: 'base64' });
-    bgStyle = `background: url(data:image/png;base64,${base64}) center/cover;`;
+    await page.evaluate(`{
+      const style = 'url(data:image/png;base64,${base64})';
+      document.querySelector('.main').style.background = style;
+      document.querySelector('.main').style.backgroundSize = 'cover';
+      document.querySelector('.title').style.background = style;
+      document.querySelector('.title').style.backgroundSize = 'cover';
+    }`);
   } else {
-    bgStyle = `background: linear-gradient(135deg, ${gradient[0]} 0%, ${gradient[1]} 100%);`;
+    await page.evaluate(`{
+      const style = 'linear-gradient(135deg, ${combo[0]} 0%, ${combo[1]} 100%)';
+      document.querySelector('.main').style.background = style;
+      document.querySelector('.title').style.background = style;
+    }`);
   }
 
-  const dateFormatted = formaterDateFr(date);
-
-  const fullHtml = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  <style>${cssContent}</style>
-</head>
-<body>
-  <div class="main" style="${bgStyle}">
-    <div class="header">
-      <h1>${escapeHtml(title)}</h1>
-      <p class="date">
-        <span class="material-symbols-rounded">calendar_today</span>
-        ${escapeHtml(dateFormatted)}
-      </p>
-    </div>
-    <div class="timeline">
-      ${eventsHtml}
-    </div>
-  </div>
-</body>
-</html>`;
-
-  const browser = await getBrowser();
-  const page = await browser.newPage();
-
-  const pageHeight = 280 + events.length * 155;
-  await page.setViewport({ width: 480, height: pageHeight, deviceScaleFactor: 2 });
-  await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
+  // Attendre le chargement des fonts (Material Symbols)
   await page.evaluateHandle('document.fonts.ready');
 
   const rnd = Math.floor(Math.random() * 1000000);
   const imagePath = path.join(os.tmpdir(), `edt_${rnd}.png`);
-
-  const mainEl = await page.$('.main');
-  if (mainEl) {
-    await mainEl.screenshot({ path: imagePath });
-  } else {
-    await page.screenshot({ path: imagePath });
-  }
-
+  await page.screenshot({ path: imagePath });
   await page.close();
+
   return { imagePath, currentEvent };
 }
