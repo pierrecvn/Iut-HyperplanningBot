@@ -9,8 +9,13 @@ import {
 } from 'discord.js';
 import type { BotCommand } from '../types/index.js';
 import { Colors } from '../config.js';
-import { VERIFIED_ROLE_NAME } from '../services/roleService.js';
+import { VERIFIED_ROLE_NAME, SPECIAL_ROLES } from '../services/roleService.js';
 import messages from '../data/messages.json' with { type: 'json' };
+
+const SPECIAL_ROLE_COLORS: Record<string, number> = {
+  Ancien: 0x95A5A6, // gris
+  Prof: 0xF39C12,   // doré
+};
 
 const GROUPS = [
   'A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2',
@@ -140,6 +145,20 @@ export async function executeSetup(interaction: import('discord.js').ButtonInter
       createdRoles.set(group, role);
     } catch (err) {
       console.error(`[Setup] Erreur creation role ${group}:`, err);
+    }
+  }
+
+  // 4b. Create special roles (Ancien, Prof)
+  console.log('[Setup] Creation des roles speciaux (Ancien, Prof)...');
+  for (const name of SPECIAL_ROLES) {
+    try {
+      await guild.roles.create({
+        name,
+        color: SPECIAL_ROLE_COLORS[name] ?? 0x99AAB5,
+        reason: 'Setup serveur — role special',
+      });
+    } catch (err) {
+      console.error(`[Setup] Erreur creation role ${name}:`, err);
     }
   }
 
@@ -289,7 +308,7 @@ export async function executeSetup(interaction: import('discord.js').ButtonInter
   const generalChannel = guild.channels.cache.find(c => c.name === 'general');
 
   let description =
-    `**Roles crees :** ${createdRoles.size + 1}/25 (Verifie + 24 groupes)\n` +
+    `**Roles crees :** ${createdRoles.size + 1 + SPECIAL_ROLES.length}/${25 + SPECIAL_ROLES.length} (Verifie + 24 groupes + ${SPECIAL_ROLES.join(', ')})\n` +
     `**Categories :** ${1 + LETTERS.length + 1} (Commun + ${LETTERS.length} lettres + BDE)\n` +
     `**Salons communs :** ${communTextChannels.length + 1}\n` +
     `**Salons par lettre :** ${LETTERS.length * 3}\n` +

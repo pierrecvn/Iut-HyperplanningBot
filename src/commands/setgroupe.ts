@@ -1,6 +1,7 @@
-import { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder } from 'discord.js';
+import { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import type { BotCommand } from '../types/index.js';
 import { getGroupKeys } from '../lib/icalUrl.js';
+import { SPECIAL_ROLES } from '../services/roleService.js';
 
 export const setgroupeCommand: BotCommand = {
   data: new SlashCommandBuilder()
@@ -17,8 +18,17 @@ export const setgroupeCommand: BotCommand = {
       .setPlaceholder('Choisissez votre groupe')
       .addOptions(choices.map(c => ({ label: c, value: c })));
 
-    const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select);
+    const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select);
 
-    await interaction.reply({ content: 'Veuillez choisir votre groupe :', components: [row], ephemeral: true });
+    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      ...SPECIAL_ROLES.map(role =>
+        new ButtonBuilder()
+          .setCustomId(`setgroupe_special_${role}`)
+          .setLabel(role)
+          .setStyle(ButtonStyle.Secondary),
+      ),
+    );
+
+    await interaction.reply({ content: 'Veuillez choisir votre groupe :', components: [selectRow, buttonRow], ephemeral: true });
   },
 };

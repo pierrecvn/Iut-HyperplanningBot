@@ -8,16 +8,24 @@ const GROUP_NAMES = [
   'I1', 'I2', 'J1', 'J2', 'K1', 'K2', 'L1', 'L2',
 ];
 
+export const SPECIAL_ROLES = ['Ancien', 'Prof'] as const;
+
 export function isGroupRole(role: Role): boolean {
   return GROUP_NAMES.includes(role.name);
 }
 
+export function isAssignableRole(role: Role): boolean {
+  return GROUP_NAMES.includes(role.name)
+    || SPECIAL_ROLES.some(s => s.toUpperCase() === role.name.toUpperCase());
+}
+
 export function findGroupRole(guild: Guild, group: string): Role | undefined {
-  return guild.roles.cache.find(r => r.name === group.toUpperCase());
+  const upper = group.toUpperCase();
+  return guild.roles.cache.find(r => r.name.toUpperCase() === upper);
 }
 
 export async function removeGroupRoles(guild: Guild, member: GuildMember): Promise<void> {
-  const toRemove = member.roles.cache.filter(r => isGroupRole(r));
+  const toRemove = member.roles.cache.filter(r => isAssignableRole(r));
   if (toRemove.size > 0) {
     await member.roles.remove(toRemove);
   }
